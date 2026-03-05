@@ -1,15 +1,26 @@
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import QRCode from "react-qr-code";
 
 export default function TiketPenitipanUser() {
-  // SESUAIKAN: Mengambil dari "tiket_aktif" agar sinkron dengan Penitipan.jsx
-  const t = JSON.parse(localStorage.getItem("tiket_aktif"));
+  const [t, setT] = useState(null);
   const navigate = useNavigate();
   
-  // Ambil origin URL secara dinamis (misal: https://sipena-app.vercel.app)
   const currentDomain = window.location.origin;
 
-  // Fungsi format tanggal lokal (26 Januari 2026)
+  useEffect(() => {
+    // Ambil data dari 'tiket_aktif' yang diset di Penitipan.jsx
+    const dataAktif = localStorage.getItem("tiket_aktif");
+    
+    if (dataAktif) {
+      try {
+        setT(JSON.parse(dataAktif));
+      } catch (err) {
+        console.error("Error parsing data tiket:", err);
+      }
+    }
+  }, []);
+
   const formatTanggal = (dateString) => {
     if (!dateString) return "-";
     const options = { day: 'numeric', month: 'long', year: 'numeric' };
@@ -20,161 +31,114 @@ export default function TiketPenitipanUser() {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f0fdf4', padding: '20px' }}>
         <div style={{ textAlign: 'center', background: 'white', padding: '30px', borderRadius: '20px', width: '100%', maxWidth: '400px', boxShadow: '0 10px 15px rgba(0,0,0,0.05)' }}>
-          <p style={{ color: '#64748b', marginBottom: '20px' }}>Data penitipan tidak ditemukan.</p>
+          <p style={{ color: '#64748b', marginBottom: '20px' }}>Data tiket tidak ditemukan.</p>
           <button 
-            style={{ background: '#059669', color: 'white', border: 'none', padding: '12px 25px', borderRadius: '12px', cursor: 'pointer', fontWeight: 'bold', width: '100%' }}
-            onClick={() => navigate("/dashboard")}
+            onClick={() => navigate("/dashboard")} 
+            style={{ padding: '10px 20px', borderRadius: '10px', border: 'none', background: '#059669', color: 'white', fontWeight: 'bold', cursor: 'pointer' }}
           >
-            Kembali ke Dashboard
+            Kembali
           </button>
         </div>
       </div>
     );
   }
 
-  // --- LOGIC TERBARU: SINKRON DENGAN TIKET KUNJUNGAN ---
-  // Menghasilkan URL Link: https://domain.com/verify/ID
-  const qrCodeValue = `${currentDomain}/verify/${t.id}`;
+  // URL untuk QR Code Verifikasi Petugas
+  const qrCodeValue = `${currentDomain}/verify-item/${t.id}`;
 
   return (
-    <div className="app" style={{ background: '#064e3b', minHeight: '100vh', padding: '30px 20px', fontFamily: 'Inter, sans-serif' }}>
-      
-      {/* HEADER TIKET */}
-      <div className="no-print" style={{ textAlign: 'center', marginBottom: '20px' }}>
-        <h2 style={{ color: 'white', margin: 0, fontSize: '18px', letterSpacing: '1px', fontWeight: '800' }}>E-TIKET PENITIPAN</h2>
-      </div>
-
-      <div className="ticket" style={{ 
-        background: '#fff', 
-        borderRadius: '25px', 
-        overflow: 'hidden', 
-        maxWidth: '400px', 
-        margin: 'auto',
-        boxShadow: '0 20px 40px rgba(0,0,0,0.3)',
-        position: 'relative'
+    <div style={{ 
+      minHeight: '100vh', 
+      background: '#059669', 
+      padding: '20px', 
+      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' 
+    }}>
+      <div style={{ 
+        background: 'white', 
+        borderRadius: '20px', 
+        padding: '20px', 
+        maxWidth: '380px', 
+        margin: '0 auto', 
+        boxShadow: '0 10px 25px rgba(0,0,0,0.1)'
       }}>
         
-        {/* BRANDING TOP */}
-        <div style={{ background: '#059669', padding: '15px', textAlign: 'center' }}>
-          <h2 style={{ color: 'white', margin: 0, fontSize: '16px', fontWeight: '800' }}>SIPENA BARANG</h2>
-          <p style={{ color: '#d1fae5', fontSize: '10px', margin: 0 }}>Lapas Kelas IIA Kerobokan</p>
+        <div style={{ textAlign: 'center', marginBottom: '15px', borderBottom: '2px dashed #e2e8f0', paddingBottom: '10px' }}>
+          <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#059669' }}>E-TIKET PENITIPAN</div>
+          <div style={{ fontSize: '14px', fontWeight: 'bold', color: '#1f2937' }}>SIPENA BARANG</div>
+          <div style={{ fontSize: '10px', color: '#64748b', textTransform: 'uppercase' }}>Lapas Kelas IIA Kerobokan</div>
         </div>
 
-        <div style={{ padding: '25px' }}>
+        <div style={{ textAlign: 'center', marginBottom: '15px' }}>
+          <div style={{ fontSize: '10px', color: '#94a3b8', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '2px' }}>TUJUAN WBP</div>
+          <div style={{ fontSize: '16px', fontWeight: 'bold', color: '#1f2937' }}>{t.wbp || 'Nama WBP'}</div>
           
-          {/* SEKSI TUJUAN WBP */}
+          {/* --- TAMPILAN BLOK/KAMAR WBP --- */}
           <div style={{ 
-            background: '#f8fafc', 
-            border: '2px solid #e2e8f0', 
-            borderRadius: '15px', 
-            padding: '20px 15px', 
-            textAlign: 'center',
-            marginBottom: '20px',
-            position: 'relative'
+            fontSize: '12px', 
+            fontWeight: 'bold', 
+            color: '#059669', 
+            background: '#f0fdf4', 
+            display: 'inline-block', 
+            padding: '3px 10px', 
+            borderRadius: '6px', 
+            marginTop: '5px',
+            border: '1px solid #bbf7d0'
           }}>
-            <span style={{ 
-              position: 'absolute', top: '-11px', left: '50%', transform: 'translateX(-50%)',
-              background: '#059669', color: 'white', padding: '3px 12px', borderRadius: '8px',
-              fontSize: '10px', fontWeight: '900', letterSpacing: '0.5px'
-            }}>TUJUAN WBP</span>
-            
-            <h1 style={{ margin: 0, fontSize: '26px', color: '#1e293b', fontWeight: '900', textTransform: 'uppercase', lineHeight: '1.2' }}>
-              {t.wbp}
-            </h1>
+            Blok/Kamar: {t.blok_wbp || '-'}
           </div>
-
-          {/* QR CODE SECTION - UPDATED LOGIC */}
-          <div style={{ textAlign: 'center', marginBottom: '25px' }}>
-            <div style={{ display: 'inline-block', padding: '12px', border: '1px solid #f1f5f9', borderRadius: '20px', background: 'white' }}>
-              <QRCode 
-                value={qrCodeValue} 
-                size={150}
-                level="H"
-              />
-            </div>
-            <p style={{ fontSize: '10px', color: '#94a3b8', marginTop: '10px', fontFamily: 'monospace', fontWeight: 'bold' }}>ID: {t.id}</p>
-            {/* Debugging Link (Kecil) */}
-            <p style={{ fontSize: '7px', color: '#cbd5e1', wordBreak: 'break-all', maxWidth: '200px', margin: '5px auto 0' }}>{qrCodeValue}</p>
-          </div>
-
-          <hr style={{ border: 'none', borderTop: '2px dashed #f1f5f9', margin: '20px 0' }} />
-
-          {/* INFORMASI PENITIP & TANGGAL */}
-          <div style={{ marginBottom: '25px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid #f8fafc' }}>
-              <span style={{ color: '#64748b', fontSize: '13px', fontWeight: '600' }}>Penitip</span>
-              <b style={{ color: '#1e293b', fontSize: '14px' }}>{t.nama_pengunjung}</b>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid #f8fafc' }}>
-              <span style={{ color: '#64748b', fontSize: '13px', fontWeight: '600' }}>Tanggal Titip</span>
-              <b style={{ color: '#1e293b', fontSize: '14px' }}>{formatTanggal(t.tanggal)}</b>
-            </div>
-          </div>
-
-          {/* NOMOR ANTREAN JUMBO */}
-          <div style={{ textAlign: 'center', background: '#ecfdf5', padding: '15px', borderRadius: '20px', border: '1px solid #d1fae5' }}>
-            <span style={{ color: '#059669', fontSize: '12px', fontWeight: '800', letterSpacing: '1px' }}>NOMOR ANTREAN</span>
-            <div style={{ fontSize: '65px', fontWeight: '900', color: '#059669', lineHeight: '1', marginTop: '5px' }}>
-              {t.antrean}
-            </div>
-          </div>
-
-          {/* KETERANGAN BARANG */}
-          <div style={{ marginTop: '20px', padding: '12px', background: '#f8fafc', borderRadius: '12px', borderLeft: '4px solid #10b981' }}>
-            <p style={{ margin: 0, fontSize: '10px', color: '#94a3b8', fontWeight: 'bold' }}>KET. BARANG:</p>
-            <p style={{ margin: '4px 0 0', fontSize: '13px', color: '#475569', fontWeight: '600', lineHeight: '1.4' }}>
-              {t.keterangan || t.ket || "Tanpa rincian barang."}
-            </p>
-          </div>
-
         </div>
 
-        {/* FOOTER INFO */}
-        <div style={{ background: '#059669', padding: '12px', textAlign: 'center' }}>
-           <p style={{ margin: 0, fontSize: '11px', color: 'white', fontWeight: '700' }}>
-             TUNJUKKAN TIKET INI PADA PETUGAS LOKET
-           </p>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '15px' }}>
+          <div style={{ background: 'white', padding: '10px', border: '1px solid #e2e8f0', borderRadius: '10px' }}>
+            <QRCode value={qrCodeValue} size={130} />
+          </div>
+        </div>
+
+        <div style={{ fontSize: '12px', color: '#475569', background: '#f8fafc', padding: '10px', borderRadius: '10px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
+            <span>Tanggal</span>
+            <span style={{ fontWeight: 'bold', color: '#1f2937' }}>{formatTanggal(t.tanggal)}</span>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
+            <span>Penitip</span>
+            <span style={{ fontWeight: 'bold', color: '#1f2937' }}>{t.nama_pengunjung || '-'}</span>
+          </div>
+          
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
+            <span>No. HP</span>
+            <span style={{ fontWeight: 'bold', color: '#1f2937' }}>{t.hp_penitip || '-'}</span>
+          </div>
+          
+          {/* --- DETAIL BARANG --- */}
+          <div style={{ marginTop: '10px', borderTop: '1px solid #e2e8f0', paddingTop: '5px' }}>
+            <div style={{ fontWeight: 'bold', color: '#1f2937' }}>RINCIAN BARANG:</div>
+            <div style={{ color: '#475569', fontSize: '11px', marginTop: '3px', whiteSpace: 'pre-line' }}>{t.keterangan || '-'}</div>
+          </div>
+        </div>
+
+        <div style={{ textAlign: 'center', marginTop: '15px', fontSize: '10px', color: '#059669', fontWeight: 'bold' }}>
+          TUNJUKKAN TIKET INI PADA PETUGAS
         </div>
       </div>
 
-      {/* ACTION BUTTONS */}
-      <div style={{ padding: '25px 0', maxWidth: '400px', margin: 'auto' }} className="no-print">
-        <button 
-          onClick={() => window.print()} 
-          style={{ 
-            width: '100%', padding: '16px', borderRadius: '15px', border: 'none', 
-            background: '#10b981', color: 'white', fontWeight: 'bold', fontSize: '16px',
-            cursor: 'pointer', marginBottom: '12px', boxShadow: '0 4px 15px rgba(16,185,129,0.3)'
-          }}
-        >
-          📥 SIMPAN TIKET (PDF / GAMBAR)
-        </button>
+      <div style={{ maxWidth: '380px', margin: '20px auto 0' }}>
         <button 
           onClick={() => navigate("/dashboard")}
           style={{ 
-            width: '100%', padding: '15px', borderRadius: '15px', border: '1px solid #6ee7b7', 
-            background: 'transparent', color: '#6ee7b7', fontWeight: 'bold', cursor: 'pointer'
+            width: '100%', 
+            padding: '14px', 
+            borderRadius: '12px', 
+            border: 'none', 
+            background: 'white', 
+            color: '#059669', 
+            fontWeight: 'bold', 
+            cursor: 'pointer',
+            fontSize: '15px'
           }}
         >
           SELESAI
         </button>
       </div>
-
-      {/* PRINT CSS */}
-      <style dangerouslySetInnerHTML={{ __html: `
-        @media print {
-          .no-print { display: none !important; }
-          body { background: white !important; padding: 0 !important; }
-          .app { background: white !important; padding: 0 !important; }
-          .ticket { 
-            box-shadow: none !important; 
-            border: 1px solid #eee !important; 
-            margin: 0 !important;
-            max-width: 100% !important;
-            border-radius: 0 !important;
-          }
-        }
-      `}} />
     </div>
   );
 }

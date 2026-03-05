@@ -4,9 +4,18 @@ import { supabase } from '../supabaseClient';
 import wbpRawData from '../wbp.json'; 
 
 export default function Penitipan() {
-  const [form, setForm] = useState({ jenis: '', jumlah: '', tanggal: '', ket: '' });
+  // --- PERUBAHAN STATE: Menambah detail barang dan no hp ---
+  const [form, setForm] = useState({ 
+    hp: '',              // Input No HP baru
+    makanan: '',         // Detail makanan
+    pakaian: '',         // Detail pakaian
+    alat_mandi: '',      // Detail alat mandi
+    lainnya: '',         // Detail barang lain
+    tanggal: '', 
+  });
+  
   const [loading, setLoading] = useState(false);
-  const [checkingLibur, setCheckingLibur] = useState(false); // Status cek API
+  const [checkingLibur, setCheckingLibur] = useState(false);
   
   const [fotoBarang, setFotoBarang] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
@@ -22,7 +31,6 @@ export default function Penitipan() {
 
   const minDate = new Date().toLocaleDateString('en-CA');
 
-  // Logic Membersihkan data WBP
   const cleanWbpData = useMemo(() => {
     const sourceData = Array.isArray(wbpRawData) ? wbpRawData : (wbpRawData.data || []);
     return sourceData.filter(item => 
@@ -30,7 +38,6 @@ export default function Penitipan() {
     );
   }, []);
 
-  // LOGIC: Cek Libur Nasional via API (Termasuk Nyepi, Galungan, dll)
   const checkLiburNasional = async (tanggalTerpilih) => {
     try {
       setCheckingLibur(true);
@@ -52,7 +59,6 @@ export default function Penitipan() {
     }
   };
 
-  // Logic Pencarian WBP
   useEffect(() => {
     const term = searchTerm.toLowerCase().trim();
     if (term.length < 2 || selectedWbp) {
@@ -78,12 +84,10 @@ export default function Penitipan() {
     }
   };
 
-  // HANDLER TANGGAL DENGAN SMART VALIDATION
   const handleTanggalChange = async (e) => {
     const tgl = e.target.value;
     if (!tgl) return;
 
-    // 1. Cek Akhir Pekan (Layanan Penitipan biasanya tutup Sabtu-Minggu)
     const day = new Date(tgl).getDay();
     if (day === 0 || day === 6) {
       alert("⚠️ Maaf, pendaftaran penitipan tutup pada hari Sabtu & Minggu.");
@@ -91,7 +95,6 @@ export default function Penitipan() {
       return;
     }
 
-    // 2. Cek Libur Nasional
     const resLibur = await checkLiburNasional(tgl);
     if (resLibur.isLibur) {
       alert(`🚫 LAYANAN LIBUR\nKeterangan: ${resLibur.keterangan}\n\nSilakan pilih hari kerja lainnya.`);
@@ -107,6 +110,7 @@ export default function Penitipan() {
     if (!selectedWbp) return alert("Silakan pilih Warga Binaan tujuan!");
     if (!fotoBarang) return alert("Mohon lampirkan foto barang titipan!");
     if (!form.tanggal) return alert("Pilih tanggal penitipan!");
+    if (!form.hp) return alert("Masukkan Nomor HP penitip!");
     
     setLoading(true);
 
@@ -139,6 +143,14 @@ export default function Penitipan() {
       }
       const antreanPrefix = `P-${nextNumber.toString().padStart(2, '0')}`;
 
+      // --- LOGIKA TERBARU: Menggabungkan detail menjadi satu string untuk keterangan ---
+      const detailBarangStr = `
+        Makanan: ${form.makanan || '-'}, 
+        Pakaian: ${form.pakaian || '-'}, 
+        Alat Mandi: ${form.alat_mandi || '-'}, 
+        Lainnya: ${form.lainnya || '-'}
+      `.trim();
+
       const payload = {
         user_id: user.id,
         nama_pengunjung: user.nama,
@@ -146,10 +158,11 @@ export default function Penitipan() {
         tanggal: form.tanggal,
         tipe: 'penitipan',
         antrean: antreanPrefix,
-        keterangan: `${form.jenis} (${form.jumlah} pcs/box) - ${form.ket || '-'}`,
+        keterangan: detailBarangStr, // Simpan detail gabungan
         foto_barang: publicUrl,
         status: 'pending',
-        kamar_wbp: selectedWbp.blok_kamar || '-'
+        kamar_wbp: selectedWbp.blok_kamar || '-',
+        hp_penitip: form.hp // Simpan No HP
       };
 
       const { data: insertedData, error } = await supabase
@@ -160,9 +173,14 @@ export default function Penitipan() {
 
       if (error) throw error;
 
-      localStorage.setItem("tiket_aktif", JSON.stringify(insertedData));
+      // Simpan ke localStorage untuk tiket (sinkronkan dengan TiketPenitipanUser)
+      localStorage.setItem("tiket_aktif", JSON.stringify({
+        ...insertedData,
+        penitip_hp: form.hp // Tambah field hp di storage
+      }));
+      
       alert(`✅ Penitipan Berhasil!\nNomor Antrean: ${antreanPrefix}`);
-      navigate("/tiket-penitipan");
+      navigate("/tiket-penitipan-user"); // Arahkan ke tiket user
 
     } catch (err) {
       console.error(err);
@@ -215,21 +233,39 @@ export default function Penitipan() {
               </div>
             )}
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '15px' }}>
-              <div>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', color: '#065f46', marginBottom: '5px' }}>Jenis</label>
-                <select required style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #d1fae5' }} onChange={e => setForm({...form, jenis: e.target.value})}>
-                  <option value="">-- Pilih --</option>
-                  <option>Makanan</option>
-                  <option>Pakaian</option>
-                  <option>Alat Mandi</option>
-                  <option>Lainnya</option>
-                </select>
-              </div>
-              <div>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', color: '#065f46', marginBottom: '5px' }}>Jumlah</label>
-                <input type="number" required placeholder="Pcs/Box" style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #d1fae5', boxSizing: 'border-box' }} onChange={e => setForm({...form, jumlah: e.target.value})} />
-              </div>
+            {/* --- INPUT BARU: NO HP --- */}
+            <div style={{ marginBottom: '15px' }}>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', color: '#065f46', marginBottom: '8px' }}>No. HP Penitip</label>
+                <input 
+                type="tel"
+                placeholder="0812..." 
+                required 
+                style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #d1fae5', boxSizing: 'border-box' }}
+                onChange={e => setForm({...form, hp: e.target.value})}
+                />
+            </div>
+
+            {/* --- INPUT BARU: DETAIL BARANG PER KATEGORI --- */}
+            <h3 style={{ fontSize: '14px', color: '#065f46', marginBottom: '10px' }}>Detail Barang</h3>
+            
+            <div style={{ marginBottom: '10px' }}>
+                <label style={{ fontSize: '12px', color: '#065f46' }}>Makanan (Qty/Box)</label>
+                <input placeholder="Contoh: 3 pcs, 2 box" style={{ width: '100%', padding: '10px', borderRadius: '10px', border: '1px solid #d1fae5', boxSizing: 'border-box' }} onChange={e => setForm({...form, makanan: e.target.value})} />
+            </div>
+            
+            <div style={{ marginBottom: '10px' }}>
+                <label style={{ fontSize: '12px', color: '#065f46' }}>Pakaian (Qty)</label>
+                <input placeholder="Contoh: 2 set, 1 kaos" style={{ width: '100%', padding: '10px', borderRadius: '10px', border: '1px solid #d1fae5', boxSizing: 'border-box' }} onChange={e => setForm({...form, pakaian: e.target.value})} />
+            </div>
+
+            <div style={{ marginBottom: '10px' }}>
+                <label style={{ fontSize: '12px', color: '#065f46' }}>Alat Mandi (Qty)</label>
+                <input placeholder="Contoh: 2 sabun, 1 sikat" style={{ width: '100%', padding: '10px', borderRadius: '10px', border: '1px solid #d1fae5', boxSizing: 'border-box' }} onChange={e => setForm({...form, alat_mandi: e.target.value})} />
+            </div>
+
+            <div style={{ marginBottom: '15px' }}>
+                <label style={{ fontSize: '12px', color: '#065f46' }}>Barang Lainnya (Detail)</label>
+                <textarea placeholder="Barang yang tidak masuk kategori diatas..." style={{ width: '100%', padding: '10px', borderRadius: '10px', border: '1px solid #d1fae5', boxSizing: 'border-box', height: '60px' }} onChange={e => setForm({...form, lainnya: e.target.value})} />
             </div>
 
             <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', color: '#065f46', marginBottom: '8px' }}>
@@ -255,13 +291,6 @@ export default function Penitipan() {
                 <img src={previewUrl} alt="Preview" style={{ width: '100%', borderRadius: '10px', border: '2px dashed #059669' }} />
               )}
             </div>
-
-            <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', color: '#065f46', marginBottom: '8px' }}>Keterangan Barang</label>
-            <textarea 
-              placeholder="Contoh: Nasi bungkus, roti, kaos polos..." 
-              style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #d1fae5', height: '80px', marginBottom: '25px', boxSizing: 'border-box' }}
-              onChange={e => setForm({...form, ket: e.target.value})}
-            ></textarea>
 
             <button 
               type="submit" disabled={loading || checkingLibur || !selectedWbp} 

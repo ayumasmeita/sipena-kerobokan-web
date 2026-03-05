@@ -6,11 +6,10 @@ export default function TiketPenitipan() {
   const [t, setT] = useState(null);
   const navigate = useNavigate();
   
-  // Ambil origin URL (misal: https://sipena-app.vercel.app)
   const currentDomain = window.location.origin;
 
   useEffect(() => {
-    // LOGIC TERBARU: Mengambil data dari 'tiket_aktif' (key standar pendaftaran)
+    // Mengambil data dari 'tiket_aktif' (key standar pendaftaran)
     // atau 'tiket_penitipan' (fallback jika dari riwayat)
     const dataAktif = localStorage.getItem("tiket_aktif");
     const dataPenitipan = localStorage.getItem("tiket_penitipan");
@@ -37,7 +36,6 @@ export default function TiketPenitipan() {
     }
   };
 
-  // Jika data belum dimuat
   if (!t) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#064e3b', padding: '20px' }}>
@@ -55,9 +53,8 @@ export default function TiketPenitipan() {
     );
   }
 
-  // LOGIC TERBARU: Generate URL verifikasi yang sama formatnya dengan TiketKunjungan
-  // Scan QR ini akan mengarah ke link verifikasi publik (bukan teks biasa)
-  const qrCodeValue = `${currentDomain}/verify/${t.id}`;
+  // QR Code mengarah ke link verifikasi publik
+  const qrCodeValue = `${currentDomain}/verify-item/${t.id}`;
 
   return (
     <div className="app-container" style={{ 
@@ -89,12 +86,27 @@ export default function TiketPenitipan() {
           </div>
           
           <h1 style={{ margin: 0, fontSize: '24px', color: '#0f172a', fontWeight: '800', textTransform: 'uppercase', lineHeight: '1.2' }}>
-            {t.wbp || 'NAMA WBP'}
+            {t.wbp || t.wbp_name || 'NAMA WBP'}
           </h1>
+          
+          {/* --- PERBAIKAN: Tampilan Blok/Kamar WBP --- */}
+          <p style={{ 
+            margin: '8px 0 0', 
+            color: '#059669', 
+            fontSize: '14px', 
+            fontWeight: 'bold', 
+            background: '#ecfdf5', 
+            padding: '5px 12px', 
+            borderRadius: '8px', 
+            display: 'inline-block',
+            border: '1px solid #a7f3d0'
+          }}>
+            Blok/Kamar: {t.kamar_wbp || '-'}
+          </p>
+          
           <p style={{ margin: '5px 0 0', color: '#64748b', fontSize: '13px', fontWeight: '500' }}>Nama Warga Binaan (Tujuan)</p>
         </div>
 
-        {/* Lingkaran sobekan tiket */}
         <div style={{ display: 'flex', alignItems: 'center', margin: '0 -12px' }}>
           <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#064e3b' }}></div>
           <div style={{ flex: 1, borderBottom: '2px dashed #f1f5f9', margin: '0 10px' }}></div>
@@ -106,6 +118,9 @@ export default function TiketPenitipan() {
             <div>
               <p style={{ margin: 0, fontSize: '10px', color: '#94a3b8', fontWeight: '800', letterSpacing: '0.5px' }}>PENITIP</p>
               <p style={{ margin: '4px 0 0', fontSize: '15px', color: '#1e293b', fontWeight: '700' }}>{t.nama_pengunjung || '-'}</p>
+              
+              {/* --- TAMPILAN BARU: NO HP --- */}
+              <p style={{ margin: '4px 0 0', fontSize: '12px', color: '#64748b', fontWeight: '600' }}>📞 {t.hp_penitip || t.penitip_hp || '-'}</p>
             </div>
             <div style={{ textAlign: 'right' }}>
               <p style={{ margin: 0, fontSize: '10px', color: '#94a3b8', fontWeight: '800', letterSpacing: '0.5px' }}>TANGGAL</p>
@@ -138,8 +153,9 @@ export default function TiketPenitipan() {
 
           <div style={{ marginBottom: '30px', background: '#f8fafc', padding: '15px', borderRadius: '15px', border: '1px solid #f1f5f9' }}>
             <p style={{ margin: '0 0 8px 0', fontSize: '10px', color: '#64748b', fontWeight: '800' }}>KETERANGAN BARANG:</p>
-            <p style={{ margin: 0, fontSize: '13px', color: '#334155', lineHeight: '1.5', fontWeight: '600', fontStyle: 'italic' }}>
-              "{t.keterangan || t.ket || "Tanpa rincian barang."}"
+            {/* Menggunakan whiteSpace pre-line agar enter di textarea terbaca */}
+            <p style={{ margin: 0, fontSize: '13px', color: '#334155', lineHeight: '1.5', fontWeight: '600', whiteSpace: 'pre-line' }}>
+              {t.keterangan || t.ket || "Tanpa rincian barang."}
             </p>
           </div>
 
@@ -158,8 +174,6 @@ export default function TiketPenitipan() {
             <div style={{ marginTop: '15px' }}>
               <p style={{ margin: 0, fontSize: '10px', color: '#94a3b8', fontWeight: '700' }}>ID TRANSAKSI</p>
               <p style={{ margin: 0, fontSize: '12px', color: '#475569', fontWeight: '700', fontFamily: 'monospace' }}>{t.id}</p>
-              {/* Kecilkan teks URL agar tidak merusak UI */}
-              <p style={{ margin: '5px 0 0', fontSize: '8px', color: '#cbd5e1', wordBreak: 'break-all' }}>{qrCodeValue}</p>
             </div>
           </div>
         </div>
