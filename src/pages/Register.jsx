@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
 import wbpRawData from '../wbp.json'; 
 
@@ -16,7 +16,6 @@ export default function Register() {
   const [wbpResults, setWbpResults] = useState([]);
   const [selectedWbp, setSelectedWbp] = useState(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -116,99 +115,261 @@ export default function Register() {
   };
 
   return (
-    <div className="app-container" style={{ maxWidth: '500px', margin: 'auto', background: '#f8fafc', minHeight: '100vh', paddingBottom: '30px' }}>
-      <div style={{ background: '#0f172a', padding: '30px 20px', color: 'white', borderRadius: '0 0 20px 20px', textAlign: 'center' }}>
-        <h1 style={{ margin: 0, fontSize: '22px' }}>Registrasi Layanan</h1>
-        <p style={{ margin: '5px 0 0', fontSize: '13px', color: '#94a3b8' }}>Lengkapi data untuk pendaftaran online</p>
+    <div className="app-container">
+      {/* HEADER */}
+      <div className="app-header">
+        <div style={{ flex: 1 }}>
+          <h1 style={{ margin: 0, fontSize: 'clamp(18px, 3.5vw, 24px)' }}>Registrasi Layanan</h1>
+          <p style={{ margin: '4px 0 0', fontSize: 'clamp(12px, 2vw, 13px)' }}>Lengkapi data untuk pendaftaran online</p>
+        </div>
       </div>
 
-      <div style={{ padding: '20px' }}>
-        <form onSubmit={handleRegister} style={{ background: 'white', padding: '20px', borderRadius: '20px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
+      <div style={{ 
+        padding: 'clamp(16px, 3vw, 24px)',
+        maxWidth: '800px',
+        margin: '0 auto'
+      }}>
+        <form onSubmit={handleRegister} className="form-card">
           
-          <h3 style={{ fontSize: '14px', color: '#3b82f6', marginBottom: '15px', borderBottom: '1px solid #eee', paddingBottom: '10px' }}>DATA DIRI PENGUNJUNG</h3>
-          
-          <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', color: '#475569', marginBottom: '5px' }}>Nama Lengkap (Sesuai ID)</label>
-          <input required style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #e2e8f0', marginBottom: '15px', boxSizing: 'border-box' }} placeholder="Masukkan nama sesuai identitas" onChange={e => setForm({...form, nama: e.target.value})} />
-
-          <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', color: '#475569', marginBottom: '5px' }}>Jenis Identitas</label>
-          <select 
-            value={form.jenis_identitas}
-            onChange={(e) => setForm({...form, jenis_identitas: e.target.value})}
-            style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #e2e8f0', marginBottom: '15px' }}
-          >
-            <option value="KTP">KTP (Warga Negara Indonesia)</option>
-            <option value="PASSPORT">Passport (Warga Negara Asing)</option>
-            <option value="KARTU PELAJAR">Kartu Pelajar / Mahasiswa</option>
-            <option value="LAINNYA">Lainnya</option>
-          </select>
-
-          <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', color: '#475569', marginBottom: '5px' }}>Nomor {form.jenis_identitas}</label>
-          <input required style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #e2e8f0', marginBottom: '15px', boxSizing: 'border-box' }} placeholder={`Masukkan nomor ${form.jenis_identitas}`} onChange={e => setForm({...form, nik: e.target.value})} />
-
-          <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', color: '#475569', marginBottom: '5px' }}>Alamat Lengkap</label>
-          <textarea required style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #e2e8f0', marginBottom: '15px', minHeight: '80px', boxSizing: 'border-box' }} placeholder="Alamat rumah saat ini" onChange={e => setForm({...form, alamat: e.target.value})} />
-
-          <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', color: '#475569', marginBottom: '5px' }}>Foto {form.jenis_identitas}</label>
-          <input required type="file" accept="image/*" onChange={handleFileChange} style={{ marginBottom: '10px', fontSize: '12px' }} />
-          
-          {previewUrl && (
-            <div style={{ marginBottom: '15px', padding: '5px', border: '1px solid #3b82f6', borderRadius: '10px' }}>
-              <img src={previewUrl} alt="Preview" style={{ width: '100%', borderRadius: '8px' }} />
+          {/* SECTION 1: DATA DIRI */}
+          <div style={{ 
+            marginBottom: '32px',
+            paddingBottom: '24px',
+            borderBottom: '2px solid #f1f5f9'
+          }}>
+            <h3 style={{ 
+              fontSize: 'clamp(14px, 2.5vw, 16px)',
+              color: '#3b82f6',
+              fontFamily: '"Outfit", sans-serif',
+              fontWeight: 800,
+              marginBottom: '20px',
+              letterSpacing: '0.5px',
+              textTransform: 'uppercase'
+            }}>
+              📋 Data Diri Pengunjung
+            </h3>
+            
+            <div style={{ marginBottom: '18px' }}>
+              <label>Nama Lengkap (Sesuai ID)</label>
+              <input 
+                required 
+                placeholder="Masukkan nama sesuai identitas" 
+                onChange={e => setForm({...form, nama: e.target.value})} 
+              />
             </div>
-          )}
 
-          <h3 style={{ fontSize: '14px', color: '#3b82f6', marginTop: '25px', marginBottom: '15px', borderBottom: '1px solid #eee', paddingBottom: '10px' }}>HUBUNGAN DENGAN WBP</h3>
+            <div style={{ marginBottom: '18px' }}>
+              <label>Jenis Identitas</label>
+              <select 
+                value={form.jenis_identitas}
+                onChange={(e) => setForm({...form, jenis_identitas: e.target.value})}
+              >
+                <option value="KTP">KTP (Warga Negara Indonesia)</option>
+                <option value="PASSPORT">Passport (Warga Negara Asing)</option>
+                <option value="KARTU PELAJAR">Kartu Pelajar / Mahasiswa</option>
+                <option value="LAINNYA">Lainnya</option>
+              </select>
+            </div>
 
-          <div style={{ position: 'relative' }}>
-            <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', color: '#475569', marginBottom: '5px' }}>Cari Nama WBP</label>
-            <input 
-              style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #e2e8f0', marginBottom: '10px', boxSizing: 'border-box' }}
-              placeholder="Ketik nama warga binaan..." 
-              value={searchTerm}
-              onChange={(e) => { setSearchTerm(e.target.value); setSelectedWbp(null); }} 
-            />
-            {isMenuOpen && wbpResults.length > 0 && (
-              <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'white', zIndex: 10, borderRadius: '10px', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', border: '1px solid #e2e8f0', maxHeight: '200px', overflowY: 'auto' }}>
-                {wbpResults.map((w, index) => (
-                  <div key={index} style={{ padding: '12px', borderBottom: '1px solid #f1f5f9', cursor: 'pointer' }} onClick={() => { setSelectedWbp(w); setSearchTerm(w.nama); setIsMenuOpen(false); }}>
-                    <div style={{ fontWeight: 'bold', fontSize: '13px' }}>{w.nama}</div>
-                    <div style={{ fontSize: '11px', color: '#3b82f6' }}>{w.blok_kamar}</div>
-                  </div>
-                ))}
-              </div>
-            )}
+            <div style={{ marginBottom: '18px' }}>
+              <label>Nomor {form.jenis_identitas}</label>
+              <input 
+                required 
+                placeholder={`Masukkan nomor ${form.jenis_identitas}`} 
+                onChange={e => setForm({...form, nik: e.target.value})} 
+              />
+            </div>
+
+            <div style={{ marginBottom: '18px' }}>
+              <label>Alamat Lengkap</label>
+              <textarea 
+                required 
+                placeholder="Alamat rumah saat ini" 
+                onChange={e => setForm({...form, alamat: e.target.value})} 
+              />
+            </div>
+
+            <div>
+              <label>Foto {form.jenis_identitas}</label>
+              <input 
+                required 
+                type="file" 
+                accept="image/*" 
+                onChange={handleFileChange}
+                style={{ 
+                  padding: '10px',
+                  fontSize: 'clamp(12px, 2vw, 14px)',
+                  cursor: 'pointer'
+                }}
+              />
+              
+              {previewUrl && (
+                <div style={{ 
+                  marginTop: '14px',
+                  padding: '8px',
+                  border: '2px solid #3b82f6',
+                  borderRadius: '16px',
+                  background: '#eff6ff'
+                }}>
+                  <img 
+                    src={previewUrl} 
+                    alt="Preview" 
+                    style={{ 
+                      width: '100%',
+                      borderRadius: '12px',
+                      display: 'block'
+                    }} 
+                  />
+                </div>
+              )}
+            </div>
           </div>
 
-          {selectedWbp && (
-            <div style={{ background: '#f0fdf4', color: '#166534', padding: '10px', borderRadius: '10px', fontSize: '12px', marginBottom: '15px', border: '1px solid #bbf7d0' }}>
-              ✅ Terpilih: <b>{selectedWbp.nama}</b> ({selectedWbp.blok_kamar})
+          {/* SECTION 2: HUBUNGAN DENGAN WBP */}
+          <div style={{ 
+            marginBottom: '32px',
+            paddingBottom: '24px',
+            borderBottom: '2px solid #f1f5f9'
+          }}>
+            <h3 style={{ 
+              fontSize: 'clamp(14px, 2.5vw, 16px)',
+              color: '#3b82f6',
+              fontFamily: '"Outfit", sans-serif',
+              fontWeight: 800,
+              marginBottom: '20px',
+              letterSpacing: '0.5px',
+              textTransform: 'uppercase'
+            }}>
+              👤 Hubungan dengan WBP
+            </h3>
+
+            <div style={{ position: 'relative', marginBottom: '18px' }}>
+              <label>Cari Nama WBP</label>
+              <input 
+                placeholder="Ketik nama warga binaan..." 
+                value={searchTerm}
+                onChange={(e) => { setSearchTerm(e.target.value); setSelectedWbp(null); }} 
+              />
+              {isMenuOpen && wbpResults.length > 0 && (
+                <div className="search-results" style={{ 
+                  position: 'absolute',
+                  top: '100%',
+                  left: 0,
+                  right: 0,
+                  zIndex: 10,
+                  marginTop: '8px'
+                }}>
+                  {wbpResults.map((w, index) => (
+                    <div 
+                      key={index} 
+                      className="result-item"
+                      onClick={() => { 
+                        setSelectedWbp(w); 
+                        setSearchTerm(w.nama); 
+                        setIsMenuOpen(false); 
+                      }}
+                    >
+                      <div style={{ fontWeight: 'bold', fontSize: 'clamp(13px, 2.5vw, 14px)' }}>
+                        {w.nama}
+                      </div>
+                      <div style={{ fontSize: 'clamp(11px, 2vw, 12px)', color: '#3b82f6', marginTop: '2px' }}>
+                        {w.blok_kamar}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
-          )}
 
-          <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', color: '#475569', marginBottom: '5px' }}>Hubungan</label>
-          <select required style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #e2e8f0', marginBottom: '20px' }} onChange={e => setForm({...form, hubungan: e.target.value})}>
-            <option value="">-- Pilih Hubungan --</option>
-            <option>Ayah</option>
-            <option>Ibu</option>
-            <option>Istri/Suami</option>
-            <option>Anak</option>
-            <option>Adik</option>
-            <option>Kakak</option>
-            <option>Saudara Jauh</option>
-            <option>Teman</option>
-            <option>Sepupu</option>
-            <option>Lainnya</option>
-          </select>
+            {selectedWbp && (
+              <div className="selected-badge">
+                ✅ Terpilih: <b>{selectedWbp.nama}</b> ({selectedWbp.blok_kamar})
+              </div>
+            )}
 
-          <h3 style={{ fontSize: '14px', color: '#3b82f6', marginBottom: '15px', borderBottom: '1px solid #eee', paddingBottom: '10px' }}>AKSES LOGIN</h3>
-          
-          <input required style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #e2e8f0', marginBottom: '10px', boxSizing: 'border-box' }} placeholder="Buat Username" onChange={e => setForm({...form, username: e.target.value})} />
-          <input type="password" required style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #e2e8f0', marginBottom: '20px', boxSizing: 'border-box' }} placeholder="Buat Password" onChange={e => setForm({...form, password: e.target.value})} />
+            <div style={{ marginTop: '18px' }}>
+              <label>Hubungan dengan WBP</label>
+              <select 
+                required 
+                onChange={e => setForm({...form, hubungan: e.target.value})}
+              >
+                <option value="">-- Pilih Hubungan --</option>
+                <option>Ayah</option>
+                <option>Ibu</option>
+                <option>Istri/Suami</option>
+                <option>Anak</option>
+                <option>Adik</option>
+                <option>Kakak</option>
+                <option>Saudara Jauh</option>
+                <option>Teman</option>
+                <option>Sepupu</option>
+                <option>Lainnya</option>
+              </select>
+            </div>
+          </div>
 
-          <button type="submit" disabled={loading || !selectedWbp} style={{ width: '100%', padding: '16px', borderRadius: '12px', border: 'none', background: '#3b82f6', color: 'white', fontWeight: 'bold', cursor: 'pointer', opacity: loading ? 0.7 : 1 }}>
-            {loading ? "Menyimpan Data..." : "Daftar Sekarang"}
+          {/* SECTION 3: AKSES LOGIN */}
+          <div style={{ marginBottom: '24px' }}>
+            <h3 style={{ 
+              fontSize: 'clamp(14px, 2.5vw, 16px)',
+              color: '#3b82f6',
+              fontFamily: '"Outfit", sans-serif',
+              fontWeight: 800,
+              marginBottom: '20px',
+              letterSpacing: '0.5px',
+              textTransform: 'uppercase'
+            }}>
+              🔐 Akses Login
+            </h3>
+            
+            <div style={{ marginBottom: '18px' }}>
+              <label>Username</label>
+              <input 
+                required 
+                placeholder="Buat username untuk login" 
+                onChange={e => setForm({...form, username: e.target.value})} 
+              />
+            </div>
+
+            <div>
+              <label>Password</label>
+              <input 
+                type="password" 
+                required 
+                placeholder="Buat password yang kuat" 
+                onChange={e => setForm({...form, password: e.target.value})} 
+              />
+            </div>
+          </div>
+
+          <button 
+            type="submit" 
+            disabled={loading || !selectedWbp} 
+            className="btn-full"
+            style={{ margin: '24px 0 0 0', width: '100%' }}
+          >
+            {loading ? "⏳ Menyimpan Data..." : "✓ Daftar Sekarang"}
           </button>
         </form>
+
+        {/* Back to Login */}
+        <Link 
+          to="/login" 
+          style={{ 
+            display: 'block',
+            textAlign: 'center',
+            marginTop: '20px',
+            color: '#64748b',
+            textDecoration: 'none',
+            fontSize: 'clamp(13px, 2.5vw, 14px)',
+            fontWeight: '600',
+            transition: 'color 0.3s ease'
+          }}
+          onMouseOver={(e) => e.target.style.color = '#3b82f6'}
+          onMouseOut={(e) => e.target.style.color = '#64748b'}
+        >
+          ← Sudah punya akun? Login disini
+        </Link>
       </div>
     </div>
   );

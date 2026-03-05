@@ -5,7 +5,6 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("user"));
   
-  // --- PERBAIKAN LOGIC START ---
   const getJadwalBlok = () => {
     const hari = new Date().getDay(); 
     const jadwal = {
@@ -13,7 +12,7 @@ export default function Dashboard() {
       2: ["YUDISTIRA B"],
       3: ["BIMA C"],
       4: ["BIMA D"],
-      5: ["ARJUNA E", "ARJUNA F", "KLINIK", "DAPUR"], // Penambahan Klinik & Dapur
+      5: ["ARJUNA E", "ARJUNA F", "KLINIK", "DAPUR"],
       6: ["LIBUR"],
       0: ["LIBUR"]
     };
@@ -21,62 +20,130 @@ export default function Dashboard() {
   };
 
   const jadwalArray = getJadwalBlok();
-  
-  // Tampilan teks untuk UI (menggabungkan isi array menjadi string)
   const jadwalHariIni = jadwalArray.join(jadwalArray.length > 1 ? " & " : "");
-  
   const isTutup = jadwalArray.includes("LIBUR");
-
-  // Perbaikan Bug: Cek apakah blok user ada di dalam daftar jadwal hari ini
-  // Menggunakan toUpperCase() dan trim() untuk menghindari salah ketik data
   const userBlok = user?.blok_wbp?.toUpperCase().trim();
   const isJadwalCocok = jadwalArray.some(blok => blok === userBlok);
-  
   const isApproved = user?.is_approved === true || user?.is_approved === 'true';
-  // --- PERBAIKAN LOGIC END ---
 
   useEffect(() => {
     if (!user) navigate("/");
   }, [user, navigate]);
 
   return (
-    <div className="app-container" style={{ maxWidth: '500px', margin: 'auto', background: '#f8fafc', minHeight: '100vh' }}>
+    <div className="app-container">
       {/* HEADER */}
-      <div style={{ background: '#0f172a', padding: '25px 20px', color: 'white', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderRadius: '0 0 20px 20px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div style={{ width: '45px', height: '45px', background: '#3b82f6', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' }}>👤</div>
-          <div>
-            <p style={{ margin: 0, fontSize: '12px', color: '#94a3b8' }}>Selamat Datang,</p>
-            <h2 style={{ margin: 0, fontSize: '16px' }}>{user?.nama || "Pengguna"}</h2>
+      <div style={{ 
+        background: 'linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%)',
+        padding: 'clamp(20px, 4vw, 32px) clamp(20px, 4vw, 32px)',
+        color: 'white',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        borderRadius: '0 0 28px 28px',
+        boxShadow: '0 8px 32px rgba(15, 23, 42, 0.4)',
+        gap: '16px',
+        flexWrap: 'wrap'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'clamp(10px, 2vw, 16px)', flex: '1 1 auto', minWidth: '200px' }}>
+          <div style={{ 
+            width: 'clamp(40px, 8vw, 52px)',
+            height: 'clamp(40px, 8vw, 52px)',
+            background: 'rgba(59, 130, 246, 0.2)',
+            borderRadius: '50%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: 'clamp(18px, 4vw, 24px)',
+            border: '2px solid rgba(59, 130, 246, 0.3)',
+            flexShrink: 0
+          }}>👤</div>
+          <div style={{ minWidth: 0 }}>
+            <p style={{ margin: 0, fontSize: 'clamp(11px, 2vw, 12px)', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              Selamat Datang,
+            </p>
+            <h2 style={{ 
+              margin: 0,
+              fontSize: 'clamp(15px, 3vw, 18px)',
+              fontFamily: '"Outfit", sans-serif',
+              fontWeight: 800,
+              letterSpacing: '-0.3px',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis'
+            }}>
+              {user?.nama || "Pengguna"}
+            </h2>
           </div>
         </div>
-        <button onClick={() => { localStorage.removeItem("user"); navigate("/"); }} 
-          style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid #ef4444', padding: '6px 12px', borderRadius: '8px', fontSize: '12px', fontWeight: 'bold' }}>
+        <button 
+          onClick={() => { localStorage.removeItem("user"); navigate("/"); }} 
+          className="logout-mini"
+        >
           Keluar
         </button>
       </div>
 
-      <div style={{ padding: '20px' }}>
+      <div style={{ padding: 'clamp(16px, 3vw, 24px)' }}>
         
         {/* CARD STATUS JADWAL */}
         <div style={{ 
-          background: isTutup ? '#fee2e2' : '#dbeafe', 
-          padding: '20px', borderRadius: '20px', marginBottom: '20px',
-          border: `1px solid ${isTutup ? '#fecaca' : '#bfdbfe'}`
+          background: isTutup ? '#fee2e2' : 'linear-gradient(135deg, #dbeafe 0%, #eff6ff 100%)',
+          padding: 'clamp(18px, 3vw, 28px)',
+          borderRadius: '24px',
+          marginBottom: 'clamp(16px, 3vw, 24px)',
+          border: `2px solid ${isTutup ? '#fecaca' : '#bfdbfe'}`,
+          boxShadow: '0 8px 24px rgba(0,0,0,0.08)'
         }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', fontSize: '12px', fontWeight: 'bold' }}>
-            <span style={{ color: '#1e40af' }}>📅 {new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' })}</span>
-            <span style={{ background: isTutup ? '#ef4444' : '#3b82f6', color: 'white', padding: '2px 8px', borderRadius: '5px' }}>
+          <div style={{ 
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '14px',
+            fontSize: 'clamp(11px, 2vw, 13px)',
+            fontWeight: 'bold',
+            gap: '12px',
+            flexWrap: 'wrap'
+          }}>
+            <span style={{ color: '#1e40af' }}>
+              📅 {new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' })}
+            </span>
+            <span style={{ 
+              background: isTutup ? '#ef4444' : '#3b82f6',
+              color: 'white',
+              padding: '6px 14px',
+              borderRadius: '999px',
+              fontSize: 'clamp(10px, 2vw, 12px)',
+              letterSpacing: '0.5px'
+            }}>
               {isTutup ? "Layanan Libur" : "Layanan Buka"}
             </span>
           </div>
-          <p style={{ margin: '0', fontSize: '13px', color: '#1e40af' }}>Jadwal Besuk Hari Ini:</p>
-          <h1 style={{ margin: '5px 0', fontSize: '24px', color: '#1e3a8a' }}>{jadwalHariIni}</h1>
+          <p style={{ margin: '0 0 6px 0', fontSize: 'clamp(12px, 2vw, 14px)', color: '#1e40af', fontWeight: 600 }}>
+            Jadwal Besuk Hari Ini:
+          </p>
+          <h1 style={{ 
+            margin: '0 0 16px 0',
+            fontSize: 'clamp(20px, 4vw, 28px)',
+            color: '#0f172a',
+            fontFamily: '"Outfit", sans-serif',
+            fontWeight: 900,
+            letterSpacing: '-0.5px'
+          }}>
+            {jadwalHariIni}
+          </h1>
 
           {/* INFORMASI DASHBOARD */}
           <div style={{ 
-            marginTop: '15px', padding: '12px', borderRadius: '12px', fontSize: '12px', lineHeight: '1.5',
-            background: 'white', color: '#334155', border: '1px solid rgba(0,0,0,0.05)'
+            marginTop: '16px',
+            padding: 'clamp(12px, 2.5vw, 16px)',
+            borderRadius: '16px',
+            fontSize: 'clamp(12px, 2vw, 13px)',
+            lineHeight: '1.6',
+            background: 'white',
+            color: '#334155',
+            border: '1px solid rgba(0,0,0,0.05)',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
           }}>
             {isApproved ? (
               isJadwalCocok ? (
@@ -90,48 +157,73 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* INFO DATA USER */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '20px' }}>
-          <div style={{ background: 'white', padding: '15px', borderRadius: '15px', border: '1px solid #e2e8f0' }}>
-            <p style={{ margin: 0, fontSize: '11px', color: '#64748b' }}>WBP TUJUAN</p>
-            <p style={{ margin: '5px 0 0', fontSize: '13px', fontWeight: 'bold' }}>{user?.wbp}</p>
+        {/* INFO DATA USER - RESPONSIVE GRID */}
+        <div style={{ 
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+          gap: 'clamp(10px, 2vw, 14px)',
+          marginBottom: 'clamp(16px, 3vw, 24px)'
+        }}>
+          <div style={{ 
+            background: 'white',
+            padding: 'clamp(14px, 2.5vw, 18px)',
+            borderRadius: '18px',
+            border: '1px solid #e2e8f0',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
+          }}>
+            <p style={{ margin: 0, fontSize: 'clamp(10px, 1.8vw, 11px)', color: '#64748b', fontWeight: 700, letterSpacing: '0.5px' }}>
+              WBP TUJUAN
+            </p>
+            <p style={{ margin: '6px 0 0', fontSize: 'clamp(12px, 2.5vw, 14px)', fontWeight: 'bold', color: '#0f172a' }}>
+              {user?.wbp}
+            </p>
           </div>
-          <div style={{ background: 'white', padding: '15px', borderRadius: '15px', border: '1px solid #e2e8f0' }}>
-            <p style={{ margin: 0, fontSize: '11px', color: '#64748b' }}>BLOK / KAMAR</p>
-            <p style={{ margin: '5px 0 0', fontSize: '13px', fontWeight: 'bold' }}>{user?.blok_wbp} / {user?.kamar_wbp}</p>
+          <div style={{ 
+            background: 'white',
+            padding: 'clamp(14px, 2.5vw, 18px)',
+            borderRadius: '18px',
+            border: '1px solid #e2e8f0',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
+          }}>
+            <p style={{ margin: 0, fontSize: 'clamp(10px, 1.8vw, 11px)', color: '#64748b', fontWeight: 700, letterSpacing: '0.5px' }}>
+              BLOK / KAMAR
+            </p>
+            <p style={{ margin: '6px 0 0', fontSize: 'clamp(12px, 2.5vw, 14px)', fontWeight: 'bold', color: '#0f172a' }}>
+              {user?.blok_wbp} / {user?.kamar_wbp}
+            </p>
           </div>
         </div>
 
-        {/* MENU UTAMA */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        {/* MENU UTAMA - USING CSS CLASSES */}
+        <div className="main-menu">
           <Link to={isApproved ? "/kunjungan" : "#"} style={{ textDecoration: 'none', opacity: isApproved ? 1 : 0.6 }}>
-            <div style={{ background: 'white', padding: '20px', borderRadius: '18px', display: 'flex', alignItems: 'center', gap: '15px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
-              <div style={{ fontSize: '30px' }}>👥</div>
-              <div style={{ flex: 1 }}>
-                <h3 style={{ margin: 0, fontSize: '16px', color: '#0f172a' }}>Pendaftaran Kunjungan</h3>
-                <p style={{ margin: 0, fontSize: '12px', color: '#64748b' }}>Booking untuk kunjungan fisik (H-1)</p>
+            <div className="menu-card">
+              <div className="menu-icon">👥</div>
+              <div className="menu-text">
+                <h3>Pendaftaran Kunjungan</h3>
+                <p>Booking untuk kunjungan fisik (H-1)</p>
               </div>
-              {!isApproved && <span>🔒</span>}
+              {!isApproved && <span className="lock-icon">🔒</span>}
             </div>
           </Link>
 
           <Link to={isApproved ? "/penitipan" : "#"} style={{ textDecoration: 'none', opacity: isApproved ? 1 : 0.6 }}>
-            <div style={{ background: 'white', padding: '20px', borderRadius: '18px', display: 'flex', alignItems: 'center', gap: '15px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
-              <div style={{ fontSize: '30px' }}>📦</div>
-              <div style={{ flex: 1 }}>
-                <h3 style={{ margin: 0, fontSize: '16px', color: '#0f172a' }}>Penitipan Barang</h3>
-                <p style={{ margin: 0, fontSize: '12px', color: '#64748b' }}>Titip makanan atau pakaian</p>
+            <div className="menu-card">
+              <div className="menu-icon">📦</div>
+              <div className="menu-text">
+                <h3>Penitipan Barang</h3>
+                <p>Titip makanan atau pakaian</p>
               </div>
-              {!isApproved && <span>🔒</span>}
+              {!isApproved && <span className="lock-icon">🔒</span>}
             </div>
           </Link>
 
           <Link to="/history" style={{ textDecoration: 'none' }}>
-            <div style={{ background: '#f1f5f9', padding: '15px', borderRadius: '18px', display: 'flex', alignItems: 'center', gap: '15px', border: '1px dashed #cbd5e1' }}>
-              <div style={{ fontSize: '24px' }}>📜</div>
-              <div style={{ flex: 1 }}>
-                <h3 style={{ margin: 0, fontSize: '14px', color: '#475569' }}>Riwayat Layanan</h3>
-                <p style={{ margin: 0, fontSize: '11px', color: '#64748b' }}>Cek status tiket & antrean</p>
+            <div className="menu-card secondary">
+              <div className="menu-icon">📜</div>
+              <div className="menu-text">
+                <h3>Riwayat Layanan</h3>
+                <p>Cek status tiket & antrean</p>
               </div>
             </div>
           </Link>

@@ -1,8 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
-
-// Import logo dari folder src
 import logoKemenimipas from '../logo-kemenimipas.png';
 
 export default function Login() {
@@ -26,7 +24,6 @@ export default function Login() {
       if (error || !data) {
         alert("❌ Username atau password salah!");
       } else {
-        // Cek jika akun belum disetujui (Kecuali Admin)
         if (data.username !== 'admin' && !data.is_approved) {
           alert("⏳ Akun Anda sedang menunggu verifikasi Admin.");
           return;
@@ -35,7 +32,6 @@ export default function Login() {
         alert("✅ Login berhasil!");
         localStorage.setItem("user", JSON.stringify(data));
         
-        // JIKA ADMIN -> Ke Panel Admin, JIKA USER -> Ke Dashboard
         if (data.username === 'admin') {
           navigate("/admin-sipena-secret");
         } else {
@@ -52,12 +48,11 @@ export default function Login() {
   return (
     <div className="app">
       <div className="app-header">
-        {/* Mengganti emoji perisai dengan logo image */}
         <div className="logo">
           <img 
             src={logoKemenimipas} 
             alt="Logo Kemenimipas" 
-            style={{ width: '80px', height: 'auto' }} 
+            style={{ width: 'clamp(60px, 12vw, 90px)', height: 'auto' }} 
           />
         </div>
         <div>
@@ -67,36 +62,72 @@ export default function Login() {
       </div>
 
       <div className="form-card">
-        <h2>Masuk</h2>
+        <h2>Masuk ke Akun</h2>
         <form onSubmit={handleLogin}>
-          <div style={{ marginBottom: '15px' }}>
+          <div>
             <label>Username</label>
             <input 
               type="text" 
-              placeholder="Masukkan username" 
+              placeholder="Masukkan username Anda" 
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required 
             />
           </div>
-          <div style={{ marginBottom: '15px' }}>
+          <div>
             <label>Password</label>
             <input 
               type="password" 
-              placeholder="Masukkan password" 
+              placeholder="Masukkan password Anda" 
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required 
             />
           </div>
           <button type="submit" className="btn-full" disabled={loading}>
-            {loading ? 'Mengecek...' : 'Masuk'}
+            {loading ? '⏳ Mengecek...' : '➜ Masuk'}
           </button>
         </form>
-        <div style={{ textAlign: 'center', marginTop: '15px', fontSize: '14px' }}>
-          Belum punya akun? <Link to="/register" style={{ color: '#2563eb', fontWeight: 'bold' }}>Daftar Disini</Link>
+        <div style={{ 
+          textAlign: 'center', 
+          marginTop: '20px', 
+          fontSize: 'clamp(13px, 2.5vw, 14px)',
+          color: '#64748b'
+        }}>
+          Belum punya akun? <Link 
+            to="/register" 
+            style={{ 
+              color: '#3b82f6', 
+              fontWeight: '700',
+              textDecoration: 'none',
+              transition: 'color 0.3s ease'
+            }}
+            onMouseOver={(e) => e.target.style.color = '#1e40af'}
+            onMouseOut={(e) => e.target.style.color = '#3b82f6'}
+          >
+            Daftar Disini
+          </Link>
         </div>
       </div>
+
+      {/* Back to Home */}
+      <Link 
+        to="/" 
+        style={{ 
+          display: 'block',
+          textAlign: 'center',
+          marginTop: '20px',
+          color: '#64748b',
+          textDecoration: 'none',
+          fontSize: 'clamp(13px, 2.5vw, 14px)',
+          fontWeight: '600',
+          transition: 'color 0.3s ease'
+        }}
+        onMouseOver={(e) => e.target.style.color = '#3b82f6'}
+        onMouseOut={(e) => e.target.style.color = '#64748b'}
+      >
+        ← Kembali ke Beranda
+      </Link>
     </div>
   );
 }
